@@ -1,0 +1,1 @@
+<view class="categorized data-v-83945602"><navigator wx:for="{{a}}" wx:for-item="item" wx:key="a" class="data-v-83945602" url="/pages/preview/preview"><image class="categorized-image data-v-83945602" src="{{b}}" mode="aspectFill"></image></navigator></view>

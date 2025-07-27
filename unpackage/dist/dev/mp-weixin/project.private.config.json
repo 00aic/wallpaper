@@ -1,0 +1,19 @@
+{
+  "libVersion": "3.8.10",
+  "setting": {
+    "compileHotReLoad": false
+  },
+  "condition": {
+    "miniprogram": {
+      "list": [
+        {
+          "name": "pages/preview/preview",
+          "pathName": "pages/preview/preview",
+          "query": "",
+          "scene": null,
+          "launchMode": "default"
+        }
+      ]
+    }
+  }
+}
