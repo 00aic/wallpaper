@@ -7,8 +7,10 @@
 			</swiper-item>
 		</swiper>
 		<view class="preview-mask" v-if="isShowMask">
+			<!-- #ifndef MP-TOUTIAO -->
 			<view class="preview-mask__back" :style="{top: getTitleBarHeight() + 'px'}" @click="goBack"><uni-icons
 					type="back" size="20" color="#fff"></uni-icons></view>
+				<!-- #endif -->
 			<view class="preview-mask__size">{{currentIndex + 1}} / {{classList.length}}</view>
 			<view class="preview-mask__time">
 				<uni-dateformat :date="Date.now()" format="hh:mm"></uni-dateformat>

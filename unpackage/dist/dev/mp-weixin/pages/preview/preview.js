@@ -121,12 +121,12 @@ const _sfc_main = {
     };
     const clickDownload = async () => {
       try {
-        common_vendor.index.__f__("log", "at pages/preview/preview.vue:245", "9999");
+        common_vendor.index.__f__("log", "at pages/preview/preview.vue:247", "9999");
         common_vendor.index.showLoading({
           title: "下载中...",
           mask: true
         });
-        common_vendor.index.__f__("log", "at pages/preview/preview.vue:250", "ddd");
+        common_vendor.index.__f__("log", "at pages/preview/preview.vue:252", "ddd");
         const {
           classid,
           _id: wallId
