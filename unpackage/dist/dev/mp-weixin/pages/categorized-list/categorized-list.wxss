@@ -23,16 +23,19 @@
 /* 垂直间距 */
 /* 透明度 */
 /* 文章场景相关 */
-.categorized.data-v-83945602 {
+.categorized-content.data-v-83945602 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10rpx;
-  aspect-ratio: 4/10;
   padding: 30rpx;
 }
-.categorized-image.data-v-83945602 {
+.categorized-content__item.data-v-83945602 {
+  aspect-ratio: 4/10;
+}
+.categorized-content__item-image.data-v-83945602 {
   height: 100%;
   width: 100%;
   object-fit: cover;
   border-radius: 10rpx;
+  display: block;
 }

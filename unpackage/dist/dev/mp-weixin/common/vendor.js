@@ -7290,7 +7290,7 @@ function isConsoleWritable() {
 function initRuntimeSocketService() {
   const hosts = "192.168.0.104,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_e1Zx6u";
+  const id = "mp-weixin_S2Js9a";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -8239,6 +8239,11 @@ const createSubpackageApp = initCreateSubpackageApp();
 const createLifeCycleHook = (lifecycle, flag = 0) => (hook, target = getCurrentInstance()) => {
   !isInSSRComponentSetup && injectHook(lifecycle, hook, target);
 };
+const onLoad = /* @__PURE__ */ createLifeCycleHook(
+  ON_LOAD,
+  2
+  /* HookFlags.PAGE */
+);
 const onUnload = /* @__PURE__ */ createLifeCycleHook(
   ON_UNLOAD,
   2
@@ -8246,6 +8251,16 @@ const onUnload = /* @__PURE__ */ createLifeCycleHook(
 );
 const onReachBottom = /* @__PURE__ */ createLifeCycleHook(
   ON_REACH_BOTTOM,
+  2
+  /* HookFlags.PAGE */
+);
+const onShareTimeline = /* @__PURE__ */ createLifeCycleHook(
+  ON_SHARE_TIMELINE,
+  2
+  /* HookFlags.PAGE */
+);
+const onShareAppMessage = /* @__PURE__ */ createLifeCycleHook(
+  ON_SHARE_APP_MESSAGE,
   2
   /* HookFlags.PAGE */
 );
@@ -8257,7 +8272,10 @@ exports.index = index;
 exports.initVueI18n = initVueI18n;
 exports.n = n;
 exports.o = o;
+exports.onLoad = onLoad;
 exports.onReachBottom = onReachBottom;
+exports.onShareAppMessage = onShareAppMessage;
+exports.onShareTimeline = onShareTimeline;
 exports.onUnload = onUnload;
 exports.p = p;
 exports.ref = ref;
@@ -8266,4 +8284,5 @@ exports.s = s;
 exports.sr = sr;
 exports.t = t;
 exports.unref = unref;
+exports.wx$1 = wx$1;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/common/vendor.js.map

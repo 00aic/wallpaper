@@ -1,7 +1,7 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
 const systemInfo = common_vendor.index.getSystemInfoSync();
-const getStatusBarHeight = () => systemInfo.statusBarHeight;
+const getStatusBarHeight = () => systemInfo.statusBarHeight || 15;
 const getTitleBarHeight = () => {
   if (common_vendor.index.getMenuButtonBoundingClientRect) {
     const { top, height } = common_vendor.index.getMenuButtonBoundingClientRect();

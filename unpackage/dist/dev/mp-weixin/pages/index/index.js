@@ -1,6 +1,5 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
-const common_assets = require("../../common/assets.js");
 const api_api = require("../../api/api.js");
 if (!Array) {
   const _easycom_nav_bar2 = common_vendor.resolveComponent("nav-bar");
@@ -23,6 +22,8 @@ const _sfc_main = {
   setup(__props) {
     const banners = common_vendor.ref([]);
     const notices = common_vendor.ref([]);
+    const dayRandoms = common_vendor.ref([]);
+    const classifys = common_vendor.ref([]);
     const getBanners = async () => {
       banners.value = (await api_api.apiGetBanner()).data;
     };
@@ -31,18 +32,53 @@ const _sfc_main = {
         select: true
       })).data;
     };
+    const getDayRandoms = async () => {
+      dayRandoms.value = (await api_api.apiGetDayRandom()).data;
+    };
+    const getClassify = async () => {
+      classifys.value = (await api_api.apiGetClassify({
+        select: true
+      })).data;
+    };
     getBanners();
     getNotices();
+    getDayRandoms();
+    getClassify();
+    const goToPreview = (id) => {
+      common_vendor.index.setStorageSync("storgClassList", dayRandoms.value);
+      common_vendor.index.navigateTo({
+        url: `/pages/preview/preview?id=${id}`
+      });
+    };
+    common_vendor.onShareAppMessage((e) => {
+      return {
+        title: "咸虾米壁纸，好看的手机壁纸",
+        path: "/pages/classify/classify"
+      };
+    });
+    common_vendor.onShareTimeline(() => {
+      return {
+        title: "咸虾米壁纸，好看的手机壁纸"
+      };
+    });
     return (_ctx, _cache) => {
       return {
         a: common_vendor.p({
           title: "推荐"
         }),
         b: common_vendor.f(banners.value, (item, k0, i0) => {
-          return {
-            a: item.picurl,
-            b: item._id
-          };
+          return common_vendor.e({
+            a: item.target === "miniProgram"
+          }, item.target === "miniProgram" ? {
+            b: item.picurl,
+            c: item.url,
+            d: item.appid
+          } : {
+            e: item.picurl,
+            f: `/pages/categorized-list/categorized-list?${item.url}`
+          }, {
+            g: item._id
+          });
         }),
         c: common_vendor.p({
           type: "sound",
@@ -51,7 +87,8 @@ const _sfc_main = {
         d: common_vendor.f(notices.value, (item, k0, i0) => {
           return {
             a: common_vendor.t(item.title),
-            b: item._id
+            b: `/pages/notice/notice?id=${item._id}`,
+            c: item._id
           };
         }),
         e: common_vendor.p({
@@ -69,22 +106,26 @@ const _sfc_main = {
         h: common_vendor.p({
           title: "每日推荐"
         }),
-        i: common_vendor.f(8, (item, k0, i0) => {
+        i: common_vendor.f(dayRandoms.value, (item, k0, i0) => {
           return {
-            a: item
+            a: item.smallPicurl,
+            b: common_vendor.o(($event) => goToPreview(item._id), item._id),
+            c: item._id
           };
         }),
-        j: common_assets._imports_0,
-        k: common_vendor.p({
+        j: common_vendor.p({
           title: "专题精选"
         }),
-        l: common_vendor.f(8, (item, k0, i0) => {
+        k: common_vendor.f(classifys.value, (item, k0, i0) => {
           return {
-            a: item,
-            b: "1cf27b2a-7-" + i0
+            a: item._id,
+            b: "1cf27b2a-7-" + i0,
+            c: common_vendor.p({
+              data: item
+            })
           };
         }),
-        m: common_vendor.p({
+        l: common_vendor.p({
           ["is-more"]: true
         })
       };
@@ -92,5 +133,6 @@ const _sfc_main = {
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-1cf27b2a"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/index/index.js.map

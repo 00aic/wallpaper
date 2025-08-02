@@ -36,7 +36,11 @@
   padding: 0 30rpx;
   aspect-ratio: 4/10;
 }
-.home .banner swiper-item .image.data-v-1cf27b2a {
+.home .banner swiper-item .navigator.data-v-1cf27b2a {
+  width: 100%;
+  height: 100%;
+}
+.home .banner swiper-item .navigator .image.data-v-1cf27b2a {
   width: 100%;
   height: 100%;
   border-radius: 10rpx;
@@ -48,10 +52,10 @@
   margin: 0 30rpx;
   align-items: center;
   justify-content: center;
-  gap: 45rpx;
+  gap: 10rpx;
   background-color: #f9f9f9;
   border-radius: 70rpx;
-  padding: 0 30rpx;
+  padding: 0 20rpx;
 }
 .home .bulletin .title.data-v-1cf27b2a {
   width: -webkit-fit-content;
@@ -73,6 +77,10 @@
   padding: 0 10rpx;
   display: flex;
   align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 30rpx;
 }
 .home .bulletin .swiper-item.data-v-1cf27b2a {
   height: 100%;

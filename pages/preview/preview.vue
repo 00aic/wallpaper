@@ -1,14 +1,15 @@
 <template>
-	<view class="preview">
-		<swiper class="preview-swiper" circular>
-			<swiper-item v-for="item in 3" :key="item" @click="showMask">
-				<image class="preview-swiper__image" src="/common/images/preview1.jpg" mode="aspectFill"></image>
+	<view class="preview" v-if="currentInfo">
+		<swiper class="preview-swiper" circular :current="currentIndex" @change="swiperChange">
+			<swiper-item v-for="(item, index) in classList" :key="item._id" @click="showMask">
+				<image v-if="readImgs.includes(index)" class="preview-swiper__image" :src="item.picurl"
+					mode="aspectFill"></image>
 			</swiper-item>
 		</swiper>
 		<view class="preview-mask" v-if="isShowMask">
 			<view class="preview-mask__back" :style="{top: getTitleBarHeight() + 'px'}" @click="goBack"><uni-icons
 					type="back" size="20" color="#fff"></uni-icons></view>
-			<view class="preview-mask__size">9 / 12</view>
+			<view class="preview-mask__size">{{currentIndex + 1}} / {{classList.length}}</view>
 			<view class="preview-mask__time">
 				<uni-dateformat :date="Date.now()" format="hh:mm"></uni-dateformat>
 			</view>
@@ -25,10 +26,10 @@
 				<view class="preview-mask__footer-content" @click="openRatePopup">
 					<uni-icons type="star" size="20"></uni-icons>
 					<view class="preview-mask__footer-content-text">
-						评分
+						{{currentInfo?.score}}分
 					</view>
 				</view>
-				<view class="preview-mask__footer-content">
+				<view class="preview-mask__footer-content" @click="clickDownload">
 					<uni-icons type="download" size="20"></uni-icons>
 					<view class="preview-mask__footer-content-text">
 						下载
@@ -49,18 +50,18 @@
 						<view class="row">
 							<view class="label">壁纸ID：</view>
 							<text class="value">
-								aaaaaaddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddaa</text>
+								{{currentInfo?._id}}</text>
 						</view>
 						<view class="row">
 							<view class="label">发布者：</view>
-							<text class="value">小咪想吃鱼</text>
+							<text class="value">{{currentInfo?.nickname}}</text>
 						</view>
 						<view class="row">
 							<view class="label">评分：</view>
 							<view class="value rate">
-								<uni-rate :readonly="true" :value="2" />
+								<uni-rate :readonly="true" :value="currentInfo?.score" />
 								<view class="score">
-									2分
+									{{currentInfo?.score}}分
 								</view>
 							</view>
 
@@ -68,26 +69,17 @@
 						<view class="row">
 							<view class="label">标签：</view>
 							<view class="value tabs">
-								<view class="tab">小吃鱼ddddd</view>
-								<view class="tab">小吃鱼ddddd</view>
-								<view class="tab">小吃鱼ddddd</view>
-								<view class="tab">小吃鱼ddddd</view>
-								<view class="tab">小吃鱼ddddd</view>
-								<view class="tab">小吃鱼ddddd</view>
-								<view class="tab">小吃鱼ddddd</view>
-								<view class="tab">小吃鱼ddddd</view>
-								<view class="tab">小吃鱼ddddd</view>
-								<view class="tab">小吃鱼ddddd</view>
-								<view class="tab">小吃鱼ddddd</view>
+								<view class="tab" v-for="tab in currentInfo?.tabs" :key="tab">{{tab}}</view>
 							</view>
 						</view>
 						<view class="row">
 							<view class="label">摘要：</view>
-							<text class="value">小鱼</text>
+							<text class="value">{{currentInfo?.description}}</text>
 						</view>
 						<view class="copyright">
 							声明：本图片来用户投稿，非商业使用，用于免费学习交流，如侵犯了您的权益，您可以拷贝壁纸ID举报至平台，邮箱513894357@qq.com，管理将删除侵权壁纸，维护您的权益。
 						</view>
+						<view class="safe-area-inset-bottom"></view>
 					</scroll-view>
 				</view>
 			</uni-popup>
@@ -95,24 +87,20 @@
 				<view class="preview-popup preview-popup-rate">
 					<view class="preview-popup-header">
 						<view class="preview-popup-header__title">
-							壁纸信息
+							{{isScore ? '评分过了~' : '壁纸评分'}}
 						</view>
 						<view class="preview-popup-header__icon" @click="closeRatePopup"><uni-icons class=""
 								type="closeempty" size="15"></uni-icons></view>
 					</view>
 					<view class="preview-popup-rate-body">
-						<uni-rate v-model="score" allowHalf />
+						<uni-rate v-model="score" allowHalf :disabled="isScore" disabled-color="#FFCA3E" />
 						<text class="preview-popup-rate-body__text">{{score}}分</text>
 					</view>
-					<button @click="submitScore" :disabled="!score" class="preview-popup-rate-submit" size="mini"
-						plain>确认评分</button>
+					<button @click="submitScore" :disabled="!score || isScore" class="preview-popup-rate-submit"
+						size="mini" plain>确认评分</button>
 				</view>
 			</uni-popup>
 		</view>
-
-
-
-
 	</view>
 </template>
 
@@ -124,16 +112,79 @@
 		getStatusBarHeight,
 		getTitleBarHeight
 	} from '@/utils/system'
+	import {
+		onLoad,
+		onShareAppMessage,
+		onShareTimeline
+	} from '@dcloudio/uni-app'
+	import {
+		apiGetSetupScore,
+		apiWriteDownload,
+		apiDetailWall
+	} from '@/api/api'
 	const infoPopup = ref(null)
 	const ratePopup = ref(null)
 	const isShowMask = ref(true)
-	const score = ref(3)
+	const score = ref(0)
+	const currentIndex = ref()
+	const currentId = ref()
+	const classList = ref([]);
+	const readImgs = ref([]);
+	const currentInfo = ref(null);
+	const isScore = ref(false)
+
+	const storgClassList = uni.getStorageSync("storgClassList") || [];
+	classList.value = storgClassList.map(item => {
+		return {
+			...item,
+			picurl: item.smallPicurl.replace("_small.webp", ".jpg")
+		}
+	})
+
+	const readImgsFun = () => {
+		readImgs.value.push(currentIndex.value <= 0 ? classList.value.length - 1 : currentIndex.value - 1,
+				currentIndex.value, currentIndex.value >= classList.value.length - 1 ? 0 : currentIndex.value + 1),
+			readImgs.value = [...new Set(readImgs.value)]
+	}
+
+	onLoad(async (e) => {
+		currentId.value = e.id
+		if (e.type === 'share') {
+			const res = await apiDetailWall({
+				id: currentId.value
+			})
+			classList.value = res.data.map((item) => {
+				return {
+					...item,
+					picurl: item.smallPicurl.replace("_small.webp", ".jpg")
+				}
+			})
+		}
+		currentIndex.value = classList.value.findIndex((item) => item._id === currentId.value)
+		currentInfo.value = classList.value[currentIndex.value]
+		readImgsFun()
+
+	})
+	const swiperChange = (e) => {
+		currentIndex.value = e.detail.current
+		currentInfo.value = classList.value[currentIndex.value]
+		readImgsFun()
+	}
+
+
 	const showMask = () => {
 		isShowMask.value = !isShowMask.value
 	}
 	// 返回上一层
-	const goBack = () => {
-		uni.navigateBack()
+	const goBack = async () => {
+		try {
+			const res = await uni.navigateBack()
+		} catch {
+			uni.reLaunch({
+				url: '/pages/index/index'
+			})
+		}
+
 	}
 
 	const openInfoPopup = () => {
@@ -144,15 +195,130 @@
 	}
 
 	const openRatePopup = () => {
+		if (currentInfo.value.userScore) {
+			isScore.value = true
+			score.value = currentInfo.value.userScore
+		}
 		ratePopup.value.open()
+
 	}
 	const closeRatePopup = () => {
 		ratePopup.value.close()
+		score.value = 0;
+		isScore.value = false
 	}
 
-	const submitScore = () => {
-		console.log("评分了");
+	const submitScore = async () => {
+		uni.showLoading({
+			title: '加载中...'
+		})
+		const {
+			classid,
+			_id: wallId
+		} = currentInfo.value
+		const res = await apiGetSetupScore({
+			classid,
+			wallId,
+			userScore: score.value
+		})
+		uni.hideLoading()
+		if (res.errCode === 0) {
+			uni.showToast({
+				title: '评分成功',
+				icon: "none"
+			})
+			classList.value[currentIndex.value].userScore = score.value
+			uni.setStorageSync("storgClassList", classList.value)
+			closeRatePopup()
+		}
+
 	}
+	const clickDownload = async () => {
+		// #ifdef H5
+		uni.showModal({
+			content: '请长按保存壁纸',
+			showCancle: false
+		})
+		// #endif
+		// #ifndef H5
+		try {
+			console.log('9999')
+			uni.showLoading({
+				title: '下载中...',
+				mask: true
+			})
+			console.log('ddd')
+			const {
+				classid,
+				_id: wallId
+			} = currentInfo.value;
+			const res = await apiWriteDownload({
+				classid,
+				wallId
+			})
+			if (res.errCode != 0) throw res;
+			const imageInfo = await uni.getImageInfo({
+				src: currentInfo.value.picurl
+			})
+			try {
+				const saveImageResult = await uni.saveImageToPhotosAlbum({
+					filePath: imageInfo.path
+				})
+				uni.showToast({
+					title: '保存成功，请到相册查看',
+					icon: 'none'
+				})
+			} catch (err) {
+				if (err.errMsg == 'saveImageToPhotosAlbum:fail cancel') {
+					uni.showToast({
+						title: '保存失败，请重新点击下载',
+						icon: 'none'
+					})
+					return
+				}
+				const authRes = await uni.showModal({
+					title: '授权提示',
+					content: '需要授权保存相册'
+				})
+				if (authRes.confirm) {
+					const setting = await uni.openSetting()
+					if (setting.authSetting['scope.writePhotosAlbum']) {
+						uni.showToast({
+							title: '获取授权成功',
+							icon: 'none'
+						})
+					} else {
+						uni.showToast({
+							title: '获取权限失败',
+							icon: 'none'
+						})
+					}
+				}
+
+			} finally {
+				uni.hideLoading()
+			}
+		} catch (err) {
+			uni.hideLoading();
+		}
+
+
+		// #endif
+	}
+	// 分享给好友
+	onShareAppMessage((e) => {
+		return {
+			title: '咸虾米壁纸',
+			path: `/pages/preview/preview?id=${currentId.value}&type=share`
+		}
+	})
+	//分享朋友圈
+	onShareTimeline(() => {
+		return {
+			title: "咸虾米壁纸",
+			query: `id=${currentId.value}&type=share`
+		}
+	})
 </script>
 
 <style lang="scss" scoped>

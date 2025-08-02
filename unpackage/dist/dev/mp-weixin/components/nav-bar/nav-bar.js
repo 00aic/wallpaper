@@ -27,7 +27,8 @@ const _sfc_main = {
           color: "#888",
           size: "18"
         }),
-        d: common_vendor.unref(utils_system.getTitleBarHeight)() + "px"
+        d: common_vendor.unref(utils_system.getTitleBarHeight)() + "px",
+        e: common_vendor.unref(utils_system.getNavBarHeight)() + "px"
       };
     };
   }

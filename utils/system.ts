@@ -1,5 +1,5 @@
 const systemInfo = uni.getSystemInfoSync()
-const getStatusBarHeight = () => systemInfo.statusBarHeight
+const getStatusBarHeight = () => systemInfo.statusBarHeight || 15
 const getTitleBarHeight = () => {
 	if (uni.getMenuButtonBoundingClientRect) {
 		const { top, height } = uni.getMenuButtonBoundingClientRect()

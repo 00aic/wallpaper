@@ -1,13 +1,16 @@
 <template>
 	<view class="theme-item">
-		<navigator url="/pages/categorized-list/categorized-list" class="theme-item-card" v-if="!isMore">
-			<image class="theme-item-card__image" src="@/common/images/classify1.jpg" mode="aspectFill"></image>
-			<view class="theme-item-card__header">2月前更新</view>
-			<view class="theme-item-card__mask">可爱萌宠</view>
+		<navigator :url="`/pages/categorized-list/categorized-list?id=${data._id}&name=${data.name}`"
+			class="theme-item-card" v-if="!isMore">
+			<image class="theme-item-card__image" :src="data.picurl" mode="aspectFill"></image>
+			<view class="theme-item-card__header" v-if="compareTimestamp(data.updateTime)">
+				{{compareTimestamp(data.updateTime)}}前更新
+			</view>
+			<view class="theme-item-card__mask">{{data.name}}</view>
 		</navigator>
 
 		<navigator url="/pages/classify/classify" open-type="switchTab" class="theme-item-card theme-item-more" v-else>
-			<image class="theme-item-card__image" src="@/static/images/more.jpg" mode="aspectFill"></image>
+			<image class="theme-item-card__image" src="@/common/images/more.jpg" mode="aspectFill"></image>
 			<view class="theme-item-card__mask">
 				<uni-icons type="more-filled" size="34" color="#fff"></uni-icons>
 				<text class="theme-item-card__mask-text">更多</text>
@@ -18,10 +21,19 @@
 </template>
 
 <script setup>
+	import {
+		compareTimestamp
+	} from '@/utils/common'
 	defineProps({
 		isMore: {
 			type: Boolean,
 			default: false
+		},
+		data: {
+			type: Object,
+			default () {
+				return {}
+			}
 		}
 	})
 </script>

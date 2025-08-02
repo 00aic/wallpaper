@@ -13,13 +13,15 @@
 		</view>
 	</view>
 
-
+	<view class="fill" :style="{height:getNavBarHeight()+'px'}">
+	</view>
 </template>
 
 <script setup>
 	import {
 		getStatusBarHeight,
-		getTitleBarHeight
+		getTitleBarHeight,
+		getNavBarHeight
 	} from '@/utils/system'
 	defineProps({
 		title: {

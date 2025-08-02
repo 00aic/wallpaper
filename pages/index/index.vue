@@ -1,11 +1,17 @@
 <template>
-	<view class="home">
+	<view class="home pageBg">
 		<nav-bar title="推荐"></nav-bar>
 		<view class="banner">
 			<swiper circular indicator-dots autoplay indicator-color="rgba(255,255,255,0.5)"
 				indicator-active-color="#fff">
 				<swiper-item v-for="item in banners" :key="item._id">
-					<image class="image" :src="item.picurl" mode="aspectFill"></image>
+					<navigator v-if="item.target === 'miniProgram'" :url="item.url" target="miniProgram"
+						:app-id="item.appid" class="navigator">
+						<image class="image" :src="item.picurl" mode="aspectFill"></image>
+					</navigator>
+					<navigator v-else :url="`/pages/categorized-list/categorized-list?${item.url}`" class="navigator">
+						<image class="image" :src="item.picurl" mode="aspectFill"></image>
+					</navigator>
 				</swiper-item>
 			</swiper>
 		</view>
@@ -16,7 +22,8 @@
 			</view>
 			<swiper vertical interval="1500" circular autoplay class=" swiper">
 				<swiper-item v-for="item in notices" :key="item._id" class="swiper-item">
-					<navigator url="/pages/notice/notice" class="swiper-navigator">{{item.title}}</navigator>
+					<navigator :url='`/pages/notice/notice?id=${item._id}`' class="swiper-navigator">{{item.title}}
+					</navigator>
 				</swiper-item>
 			</swiper>
 			<uni-icons type="forward" size="20" class="forward"></uni-icons>
@@ -29,18 +36,18 @@
 				</view>
 			</common-title>
 			<scroll-view scroll-x class="content">
-				<navigator url="/pages/preview/preview" v-for="item in 8" :key="item" class="content__card">
-					<image class="content__card-image" src="@/common/images/preview_small.webp" mode="aspectFill">
+				<view @click="goToPreview(item._id)" v-for="item in dayRandoms" :key="item._id" class="content__card">
+					<image class="content__card-image" :src="item.smallPicurl" mode="aspectFill">
 					</image>
-				</navigator>
+				</view>
 			</scroll-view>
 		</view>
 		<view class="theme">
 			<common-title title="专题精选">
-				<view class="theme-header">More+</view>
+				<navigator class="theme-header" url="/pages/classify/classify" open-type="switchTab">More+</navigator>
 			</common-title>
 			<view class="theme-content">
-				<theme-item v-for="item in 8" :key="item"></theme-item>
+				<theme-item v-for="item in classifys" :key="item._id" :data="item"></theme-item>
 				<theme-item :is-more="true"></theme-item>
 			</view>
 		</view>
@@ -58,9 +65,15 @@
 	import {
 		ref
 	} from 'vue'
+	import {
+		onShareAppMessage,
+		onShareTimeline
+	} from '@dcloudio/uni-app'
 
 	const banners = ref([])
 	const notices = ref([])
+	const dayRandoms = ref([])
+	const classifys = ref([])
 	const getBanners = async () => {
 		banners.value = (await apiGetBanner()).data
 	}
@@ -69,8 +82,39 @@
 			select: true
 		})).data
 	}
+	const getDayRandoms = async () => {
+		dayRandoms.value = (await apiGetDayRandom()).data
+	}
+	const getClassify = async () => {
+		classifys.value = (await apiGetClassify({
+			select: true
+		})).data
+	}
 	getBanners()
 	getNotices()
+	getDayRandoms()
+	getClassify()
+
+	const goToPreview = (id) => {
+		uni.setStorageSync("storgClassList", dayRandoms.value)
+		uni.navigateTo({
+			url: `/pages/preview/preview?id=${id}`
+		})
+	}
+
+	// 分享给好友
+	onShareAppMessage((e) => {
+		return {
+			title: "咸虾米壁纸，好看的手机壁纸",
+			path: '/pages/classify/classify'
+		}
+	})
+	//分享朋友圈
+	onShareTimeline(() => {
+		return {
+			title: "咸虾米壁纸，好看的手机壁纸"
+		}
+	})
 </script>
 
 <style lang="scss" scoped>
@@ -89,12 +133,19 @@
 					padding: 0 30rpx;
 					aspect-ratio: 4 / 10;
 
-					.image {
+					.navigator {
 						width: 100%;
 						height: 100%;
-						border-radius: 10rpx;
-						object-fit: cover;
+
+						.image {
+							width: 100%;
+							height: 100%;
+							border-radius: 10rpx;
+							object-fit: cover;
+						}
 					}
+
+
 				}
 			}
 		}
@@ -105,10 +156,10 @@
 			margin: 0 30rpx;
 			align-items: center;
 			justify-content: center;
-			gap: 45rpx;
+			gap: 10rpx;
 			background-color: #f9f9f9;
 			border-radius: 70rpx;
-			padding: 0 30rpx;
+			padding: 0 20rpx;
 
 			.title {
 				width: fit-content;
@@ -133,6 +184,10 @@
 				padding: 0 10rpx;
 				display: flex;
 				align-items: center;
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+				font-size: 30rpx;
 
 				&-item {
 					height: 100%;
